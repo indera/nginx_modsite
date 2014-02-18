@@ -1,0 +1,39 @@
+server {
+    listen   {{server_ip}}:80;
+    server_name  www.{{domain}};
+    rewrite ^    http://{{domain}}$request_uri? permanent;
+}
+
+server {
+        listen   {{server_ip}}:80;
+        root /home/{{user}}/www/{{domain}}/htdocs;
+        access_log /home/example/www/{{domain}}/log/access.log main;
+        error_log /home/example/www/{{domain}}/log/error.log error;
+        server_name {{domain}} www.{{domain}};
+        index index.php index.html
+        include conf.d/drop;
+
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml)$ {
+        access_log        off;
+        log_not_found     off;
+        expires           1d;
+    }
+    
+    location ~* \.php$ {
+        fastcgi_index   index.php;
+        fastcgi_pass    unix:/dev/shm/php-fpm-www.sock;
+        include         fastcgi_params;
+        fastcgi_param   SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+        fastcgi_param   SCRIPT_NAME        $fastcgi_script_name;
+    }
+
+    location = /account/login.php {
+        auth_basic            "Restricted";
+        auth_basic_user_file  /etc/nginx/sites-enabled/htpasswd;
+        fastcgi_index         index.php;
+        fastcgi_pass          unix:/dev/shm/php-fpm-www.sock;
+        include               fastcgi_params;
+        fastcgi_param         SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+        fastcgi_param         SCRIPT_NAME        $fastcgi_script_name;
+    }
+}
