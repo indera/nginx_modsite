@@ -7,7 +7,7 @@ import time
 def phpfpm_install():
     print green("Installing php-fpm including mcrypt, mysql, cli")
     with settings(warn_only=True):
-        result = local('apt-get install -y php5-cli php5-common php5-mysql php5-gd php5-fpm php5-cgi php5-fpm php-pear php5-mcrypt', capture=True)
+        result = local('apt-get install -y php5-cli php5-common php5-mysql php5-gd php5-fpm php5-cgi php5-fpm php-pear php5-mcrypt php5-curl', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")       
     print red('php-fpm installed!')
@@ -203,14 +203,98 @@ def install_ioncube():
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")
     print red('IonCube installed!')
+    
+    
+def unrar_install():
+    print green('Installing Unrar')
+    with settings(warn_only=True):
+        result = local('apt-get install -y unrar', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")  
+    print red('IonCube installed!')
      
 def mysql_install():
     with settings(warn_only=True):
         result = local('apt-get install -y mysql-server', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")
+
+def update_nginx_conf():
+    print green('Updating nginx.conf')
+    prompt('Number of cores:', key='cores', validate=int)
+    with settings(warn_only=True):
+        result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/nginx.conf', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")   
+    template = open('nginx.conf').read()
+    with settings(warn_only=True):
+        result = local('rm nginx.conf', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")     
+    template = template.replace('{{cores}}', str(env.cores))
+    f = open('/etc/nginx/nginx.conf', 'w')
+    f.write(template)
+    f.close()
+    with settings(warn_only=True):
+        result = local('/etc/init.d/nginx restart', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")        
+    print red('nginx.conf updated!')
+        
+def configure_domain():
+    print green('Configuring Domain')
+    prompt('Type domain name:', key='domain')
+    prompt('Type server ip:', key='ip')
+    prompt('Type user (zaggi):', key='user')
+    with settings(warn_only=True):
+        result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/cfg_template', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")   
+    template = open('cfg_template').read()
+    with settings(warn_only=True):
+        result = local('rm cfg_template', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")   
+    template = open('cfg_template').read()    
+    template = template.replace('{{domain}}', env.domain)
+    template = template.replace('{{server_ip}}', env.ip)
+    template = template.replace('{{user}}', env.user)
+    with settings(warn_only=True):  
+        result = local('mkdir -p /home/%s/www/%s/htdocs' % (env.user, env.domain), capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")
+    with settings(warn_only=True):  
+        result = local('mkdir -p /home/%s/www/%s/log' % (env.user, env.domain), capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")       
+    f = open('/etc/nginx/sites-available/%s.conf' % env.domain, 'w')        
+    f.write(template)
+    f.close()
+    nginx_disable_default()
+    with settings(warn_only=True):  
+        result = local('nginx_modsite -e %s.conf' % env.domain, capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")
+    
+    with settings(warn_only=True):
+        with lcd('/home/%s/www/%s/htdocs/' % (env.user, env.domain)):
+            result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/wso.php', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")      
+    with settings(warn_only=True):  
+        with lcd('/home/%s/www/%s/htdocs/' % (env.user, env.domain)):
+            result = local('chown www-data:www-data wso.php', capture=True)
+            result = local('chmod 755 wso.php', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")
+        
+    print red('Domain configured!')
+    
+    
      
 def setup_server():
+    unrar_install()
+    time.sleep(5)
     create_user()
     time.sleep(5)
     remove_apache()
