@@ -246,9 +246,10 @@ def configure_domain():
     print green('Configuring Domain')
     prompt('Type domain name:', key='domain')
     prompt('Type server ip:', key='ip')
-    prompt('Type user (zaggi):', key='user')
+    prompt('Type user (zaggi):', key='uzer')
     with settings(warn_only=True):
         result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/cfg_template', capture=True)
+        time.sleep(2)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")   
     template = open('cfg_template').read()
@@ -259,13 +260,13 @@ def configure_domain():
     template = open('cfg_template').read()    
     template = template.replace('{{domain}}', env.domain)
     template = template.replace('{{server_ip}}', env.ip)
-    template = template.replace('{{user}}', env.user)
+    template = template.replace('{{user}}', env.uzer)
     with settings(warn_only=True):  
-        result = local('mkdir -p /home/%s/www/%s/htdocs' % (env.user, env.domain), capture=True)
+        result = local('mkdir -p /home/%s/www/%s/htdocs' % (env.uzer, env.domain), capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")
     with settings(warn_only=True):  
-        result = local('mkdir -p /home/%s/www/%s/log' % (env.user, env.domain), capture=True)
+        result = local('mkdir -p /home/%s/www/%s/log' % (env.uzer, env.domain), capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")       
     f = open('/etc/nginx/sites-available/%s.conf' % env.domain, 'w')        
