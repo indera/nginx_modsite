@@ -39,6 +39,7 @@ def create_user():
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")     
     with settings(warn_only=True):
+        print yellow("Input user passwd two times")
         result = local('passwd zaggi', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")     
@@ -211,7 +212,7 @@ def unrar_install():
         result = local('apt-get install -y unrar', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")  
-    print red('IonCube installed!')
+    print red('Unrar installed!')
      
 def mysql_install():
     with settings(warn_only=True):
@@ -292,7 +293,8 @@ def configure_domain():
     
     
      
-def setup_server():
+def 
+:
     unrar_install()
     time.sleep(5)
     create_user()
