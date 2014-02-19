@@ -275,7 +275,6 @@ def configure_domain():
         result = local('nginx_modsite -e %s.conf' % env.domain, capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")
-    
     with settings(warn_only=True):
         with lcd('/home/%s/www/%s/htdocs/' % (env.user, env.domain)):
             result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/wso.php', capture=True)
