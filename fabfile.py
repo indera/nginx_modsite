@@ -270,11 +270,6 @@ def configure_domain():
     f = open('/etc/nginx/sites-available/%s.conf' % env.domain, 'w')        
     f.write(template)
     f.close()
-    nginx_disable_default()
-    with settings(warn_only=True):  
-        result = local('nginx_modsite -e %s.conf' % env.domain, capture=True)
-    if result.failed and not confirm("Task failed. Continue anyway?"):
-        abort("Aborting at user request.")
     with settings(warn_only=True):
         with lcd('/home/%s/www/%s/htdocs/' % (env.user, env.domain)):
             result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/wso.php', capture=True)
@@ -284,6 +279,12 @@ def configure_domain():
         with lcd('/home/%s/www/%s/htdocs/' % (env.user, env.domain)):
             result = local('chown www-data:www-data wso.php', capture=True)
             result = local('chmod 755 wso.php', capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")
+
+    nginx_disable_default()
+    with settings(warn_only=True):  
+        result = local('nginx_modsite -e %s.conf' % env.domain, capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")
         
