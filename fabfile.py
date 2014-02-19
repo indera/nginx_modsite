@@ -249,15 +249,13 @@ def configure_domain():
     prompt('Type user (zaggi):', key='uzer')
     with settings(warn_only=True):
         result = local('wget https://raw.github.com/mrzgorg/nginx_modsite/master/cfg_template', capture=True)
-        time.sleep(2)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")   
     template = open('cfg_template').read()
     with settings(warn_only=True):
         result = local('rm cfg_template', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
-        abort("Aborting at user request.")   
-    template = open('cfg_template').read()    
+        abort("Aborting at user request.")       
     template = template.replace('{{domain}}', env.domain)
     template = template.replace('{{server_ip}}', env.ip)
     template = template.replace('{{user}}', env.uzer)
