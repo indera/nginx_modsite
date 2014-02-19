@@ -278,8 +278,8 @@ def configure_domain():
         abort("Aborting at user request.")      
     with settings(warn_only=True):  
         with lcd('/home/%s/www/%s/htdocs/' % (env.uzer, env.domain)):
-            result = local('chown www-data:www-data wso.php', capture=True)
-            result = local('chmod 755 wso.php', capture=True)
+            result = local('chown -R www-data:www-data ./', capture=True)
+            result = local('chmod -R 755 ./', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")
 
@@ -288,7 +288,10 @@ def configure_domain():
         result = local('nginx_modsite -e %s.conf' % env.domain, capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")    
-        
+    with settings(warn_only=True):  
+        result = local('service nginx restart' % env.domain, capture=True)
+    if result.failed and not confirm("Task failed. Continue anyway?"):
+        abort("Aborting at user request.")    
     print red('Domain configured!')
     
     
