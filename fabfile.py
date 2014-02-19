@@ -294,9 +294,7 @@ def configure_domain():
     
     
      
-def 
-:
-    unrar_install()
+def setup_server():
     time.sleep(5)
     create_user()
     time.sleep(5)
