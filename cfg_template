@@ -7,8 +7,8 @@ server {
 server {
         listen   {{server_ip}}:80;
         root /home/{{user}}/www/{{domain}}/htdocs;
-        access_log /home/example/www/{{domain}}/log/access.log main;
-        error_log /home/example/www/{{domain}}/log/error.log error;
+        access_log /home/{{user}}/www/{{domain}}/log/access.log main;
+        error_log /home/{{user}}/www/{{domain}}/log/error.log error;
         server_name {{domain}} www.{{domain}};
         index index.php index.html
         include conf.d/drop;
