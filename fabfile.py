@@ -311,4 +311,6 @@ def setup_server():
     time.sleep(5)
     install_ioncube()
     time.sleep(5)
+    update_nginx_conf()
+    time.sleep(5)
     nginx_disable_default()
