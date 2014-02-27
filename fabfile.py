@@ -289,7 +289,7 @@ def configure_domain():
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")    
     with settings(warn_only=True):  
-        result = local('service nginx restart' % env.domain, capture=True)
+        result = local('service nginx restart', capture=True)
     if result.failed and not confirm("Task failed. Continue anyway?"):
         abort("Aborting at user request.")    
     print red('Domain configured!')
